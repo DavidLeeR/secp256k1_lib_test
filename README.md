@@ -11,3 +11,6 @@ testing using the bitcoin/ethereum secp256k1 generating/signing library
 ## Build:
 - run command **make** in the root directory
 
+## Notes:
+- this build seems to need the h256 data type (hence all the extra header files in the include dir)
+
