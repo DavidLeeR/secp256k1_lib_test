@@ -6,3 +6,6 @@ testing using the bitcoin/ethereum secp256k1 generating/signing library
 
 ## Build:
 - run command **make** in the root directory
+
+## Notes:
+- this build seems to need the secp256k1_scalar_get_b32() function and the secp256k1_scalar data type
