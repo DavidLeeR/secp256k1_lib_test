@@ -4,10 +4,10 @@ LDIR = lib
 LIBS = -L $(LDIR) -l secp256k1
 
 test: $(OBJ)
-	$(CC) -o test $(OBJ) $(LIBS)
+	$(CC) -Wall -g -std=c++11 -o test $(OBJ) $(LIBS)
 
 test.o: test.cpp
-	$(CC) -c test.cpp
+	$(CC) -Wall -g -std=c++11 -c test.cpp
 
 clean:
 	rm *.o 
