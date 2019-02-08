@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 OBJ = test.o
 LDIR = lib
 LIBS = -L $(LDIR) -l secp256k1
@@ -6,8 +6,8 @@ LIBS = -L $(LDIR) -l secp256k1
 test: $(OBJ)
 	$(CC) -o test $(OBJ) $(LIBS)
 
-test.o: test.c 
-	$(CC) -c test.c
+test.o: test.cpp
+	$(CC) -c test.cpp
 
 clean:
 	rm *.o 

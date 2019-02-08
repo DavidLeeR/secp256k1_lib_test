@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "include/secp256k1.h"
+#include "include/FixedHash.h"
 
 int main() 
 {
