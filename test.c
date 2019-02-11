@@ -5,6 +5,8 @@
 #include "include/secp256k1.h"
 #include "include/scalar.h"
 #include "include/scalar_4x64_impl.h"
+#include "include/scalar_4x64.h"
+
 
 int main() 
 {
