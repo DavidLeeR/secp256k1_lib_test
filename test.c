@@ -1,26 +1,36 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "include/secp256k1.h"
+#include "include/scalar.h"
+#include "include/scalar_4x64_impl.h"
 
 int main() 
 {
     secp256k1_context *myContext = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
     secp256k1_ecdsa_signature mySig;
 
-    /*the following 2 variables not currently working correctly, they need to be in either uint256 from (Bitcoin) or h256 form (Ethereum)
-    This requires that we include more source code from Ethereum C++ repo*/
-
-    /*according to code in tests_exhaustive.c (within go-ethereum-master) project, we should
+    /*according to code in tests_exhaustive.c line 258 (within go-ethereum-master) project, we should
     be able to use this format for the key and message*/
-    secp256k1_scalar msg;
-    unsigned char myMessageHash[32], myPrivateKey[32];
+    secp256k1_scalar myMessageHash, myPrivateKey;
+    unsigned char myMessageHash32[32], myPrivateKey32[32];
 
-    secp256k1_scalar_get_b32(msg32, &msg);
+    secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
+    secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
 
 
     const unsigned char *myMessageHashPtr = &myMessageHash;
     const unsigned char *myPrivateKeyPtr = &myPrivateKey;
 
-    secp256k1_ecdsa_sign(myContext, &mySig, myMessageHashPtr, myPrivateKeyPtr, NULL, NULL);
+    secp256k1_ecdsa_sign(myContext, &mySig, myMessageHash32, myPrivateKey32, NULL, NULL);
 
     return 0;
 }
+
+/*
+LOG
+
+1/11/16 - does not compile, needs declarations/implementations for "secp256k1_scaler" and "secp256k1_scalar_get_b32"
+
+*/
