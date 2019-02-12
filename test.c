@@ -45,11 +45,55 @@ int main()
     secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
     secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
 
+    //print the message hash
+    printf("Message hash: \n");
+    for (int k = 0; k < 32; k++)
+    {
+        printf("%x", myMessageHash32[k]);
+    }
+    printf("\n\n");
+
+    //print the test private key
+    printf("Private key: \n");
+    for (int j = 0; j < 32; j++)
+    {
+        printf("%x", myPrivateKey32[j]);
+    }
+    printf("\n\n");
+
+    //verify the private key
+    if(1 == secp256k1_ec_seckey_verify(myContext, myPrivateKey32))
+    {
+        printf("Private key verified\n\n");
+    }
+    else
+    {
+        printf("Private key failed verification\n\n");
+    }
+
+    //construct the corresponding public key
+    if(1 == secp256k1_ec_pubkey_create(myContext, &myPublicKey, myPrivateKey32))
+    {
+        printf("Public key created\n\n");
+    }
+    else
+    {
+        printf("Public key could not be created\n\n");
+    }
+
+    //print the corresponding public key
+    printf("Public key: \n");
+    for (int m = 0; m < 64; m++)
+    {
+        printf("%x", mySig.data[m]);
+    }
+    printf("\n\n");
+    
     //sign message hash with private key
     secp256k1_ecdsa_sign(myContext, &mySig, myMessageHash32, myPrivateKey32, NULL, NULL);
 
     //print signature in hex
-    printf("signature: ");
+    printf("Signature: \n");
     for (int i = 0; i < 64; i++)
     {
         printf("%x", mySig.data[i]);
@@ -65,5 +109,11 @@ LOG
 1/11/16 - does not compile, needs declarations/implementations for "secp256k1_scaler" and "secp256k1_scalar_get_b32"
 
         - compilation works after including more headers and typedef for uint128 in scalar_4_64, need to check output somehow
+
+1/12/16 - compiles and outputs signature
+
+        - need to verify signature and customize inputs to signature function
+
+        - debug statements added
 
 */
