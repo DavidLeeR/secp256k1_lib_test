@@ -35,4 +35,6 @@ LOG
 
 1/11/16 - does not compile, needs declarations/implementations for "secp256k1_scaler" and "secp256k1_scalar_get_b32"
 
+        - compilation works after including more headers and typedef for uint128 in scalar_4_64, need to check output somehow
+
 */

@@ -4,6 +4,9 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
  **********************************************************************/
 
+//included for declaration of VERIFY_CHECK
+#include "util.h"
+
 #ifndef _SECP256K1_SCALAR_REPR_IMPL_H_
 #define _SECP256K1_SCALAR_REPR_IMPL_H_
 
