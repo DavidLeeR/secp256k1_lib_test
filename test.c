@@ -30,11 +30,13 @@ int main()
     line 150*/
 
     //setup params needed for signing function
-    secp256k1_context *myContext = secp256k1_context_create(SECP256K1_CONTEXT_SIGN);
+    ////set to both sign and verify
+    secp256k1_context *myContext = secp256k1_context_create(SECP256K1_CONTEXT_SIGN| SECP256K1_CONTEXT_VERIFY); 
     secp256k1_ecdsa_signature mySig;
     secp256k1_scalar myMessageHash, myPrivateKey;
     secp256k1_pubkey myPublicKey;
     unsigned char myMessageHash32[32], myPrivateKey32[32];
+    ////this will end up holding the signature
     unsigned char sig[74];
 
     //generate random message hash and private key?
@@ -52,6 +54,12 @@ int main()
         printf("%x", myMessageHash32[k]);
     }
     printf("\n\n");
+
+    //testing if verify sig will fail if private key manually changed before public key creation
+    //EXPECTED RESULT: sig verify should not fail
+    //RESULT: verify does not fail
+    //myPrivateKey32[0] = 0;
+    //myPrivateKey32[5] = 0;
 
     //print the test private key
     printf("Private key: \n");
@@ -85,7 +93,7 @@ int main()
     printf("Public key: \n");
     for (int m = 0; m < 64; m++)
     {
-        printf("%x", mySig.data[m]);
+        printf("%x", myPublicKey.data[m]);
     }
     printf("\n\n");
     
@@ -98,8 +106,30 @@ int main()
     {
         printf("%x", mySig.data[i]);
     }
-    printf("\n");
+    printf("\n\n");
 
+    //test to see if sig verify will fail if signature manually changed
+    //EXPECTED RESULT: sig verify should fail
+    //RESULT: sig verify fails
+    //mySig.data[0] = 0;
+    //mySig.data[5] = 0;
+
+    //test to see if sig verify will fail if public key manually changed after signing
+    //EXPECTED RESULT: sig verify should fail
+    //RESULT: sig verify fails
+    //myPublicKey.data[0] = 0;
+    //myPublicKey.data[5] = 0;
+
+    //verify signature
+    if (1 == secp256k1_ecdsa_verify(myContext, &mySig, myMessageHash32, &myPublicKey))
+    {
+        printf("Signature verified\n");
+    }
+    else
+    {
+        printf("Signature could not be verified\n");
+    }
+    
     return 0;
 }
 
