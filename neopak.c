@@ -146,23 +146,39 @@ void testSignEcdsa()
 
 int main(int argc, char *argv[]) 
 {
-
     char arg1[65];
     char arg2[65];
+
     //if no args passed, display usage info
     if (argc == 1)
     {
         usage();
         return 0;
     }
-    //if private key and message hash not provided as command line arguments, 
-    //use randomly generated  message hash and private keys for signing test
-    if (argc == 2 && strcmp(argv[1],"test") == 0)
+    //if only "test" is passed as arg, start test sign
+    else if (argc == 2)
     {
-        printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
-        testSignEcdsa();
+        if(strcmp(argv[1],"test") == 0)
+        {
+            printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
+            testSignEcdsa();
+        }
+        else
+        {
+            printf("\nError: incorrect usage, run program with no args for usage info\n\n");
+        }
     }
-    
+    //if private key and message hash are passed as args, start
+    //production sign
+    else if (argc == 3)
+    {
+        //call signEcdsa() here after it is implemented
+    }
+    //else, too many args passed
+    else
+    {
+        printf("\nError: incorrect usage, run program with no args for usage info\n\n");
+    }
     
     return 0;
 }
