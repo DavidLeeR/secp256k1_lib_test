@@ -8,7 +8,7 @@
 #include "include/scalar_4x64.h"
 #include "include/testrand_impl.h"
 
-
+//helper function for testSignEcdsa()
 void random_scalar_order_test_new(secp256k1_scalar *num) {
    do {
        unsigned char b32[32];
@@ -22,6 +22,7 @@ void random_scalar_order_test_new(secp256k1_scalar *num) {
    } while(1);
 }
 
+//displays usage info
 void usage()
 {
     printf("\nNeoPak\nCopywrite NeoWare 2019\n");
@@ -32,17 +33,9 @@ void usage()
     printf("./neopak <privKey> <messageHash>          Sign with provided priv key and message hash\n");
 }
 
-int main(int argc, char *argv[]) 
+//creates a test ECDSA signature using a test message hash and a test private key
+void testSignEcdsa()
 {
-
-    char arg1[65];
-    char arg2[65];
-    //if no args passed, display usage info
-    if (argc == 1)
-    {
-        usage();
-        return 0;
-    }
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
     line 150*/
@@ -65,13 +58,6 @@ int main(int argc, char *argv[])
     //convert message hash to unsigned char 32 bytes?
     secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
     secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
-
-    //if private key and message hash not provided as command line arguments, 
-    //use randomly generated  message hash and private keys for signing test
-    if (argc == 2 && strcmp(argv[1],"test") == 0)
-    {
-        printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
-    }
 
     //print the message hash
     printf("Message hash: \n");
@@ -156,6 +142,27 @@ int main(int argc, char *argv[])
     {
         printf("Signature could not be verified\n");
     }
+}
+
+int main(int argc, char *argv[]) 
+{
+
+    char arg1[65];
+    char arg2[65];
+    //if no args passed, display usage info
+    if (argc == 1)
+    {
+        usage();
+        return 0;
+    }
+    //if private key and message hash not provided as command line arguments, 
+    //use randomly generated  message hash and private keys for signing test
+    if (argc == 2 && strcmp(argv[1],"test") == 0)
+    {
+        printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
+        testSignEcdsa();
+    }
+    
     
     return 0;
 }
@@ -172,6 +179,10 @@ LOG
         - verify signature implemented
         - priv/pub key creation, signing, and verification seemingly working
 
-1/13/19 - 
+1/13/19 - printing of hex's fixed
+        - testSign function separated from main()
+        - usage info added
+        - 3 options added to command line (usage, test sign, production sign)
+            -prod sign not yet implemented
 
 */
