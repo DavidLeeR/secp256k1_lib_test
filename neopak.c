@@ -22,8 +22,27 @@ void random_scalar_order_test_new(secp256k1_scalar *num) {
    } while(1);
 }
 
-int main() 
+void usage()
 {
+    printf("\nNeoPak\nCopywrite NeoWare 2019\n");
+    printf("Created by David Lee Ramirez 2/12/2019\n\n");
+    printf("Usage:\n");
+    printf("./neopak                                  Show usage info\n");
+    printf("./neopak test                             Sign with test priv key and message hash\n");
+    printf("./neopak <privKey> <messageHash>          Sign with provided priv key and message hash\n");
+}
+
+int main(int argc, char *argv[]) 
+{
+
+    char arg1[65];
+    char arg2[65];
+    //if no args passed, display usage info
+    if (argc == 1)
+    {
+        usage();
+        return 0;
+    }
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
     line 150*/
@@ -47,11 +66,19 @@ int main()
     secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
     secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
 
+    //if private key and message hash not provided as command line arguments, 
+    //use randomly generated  message hash and private keys for signing test
+    if (argc == 2 && strcmp(argv[1],"test") == 0)
+    {
+        printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
+    }
+
     //print the message hash
     printf("Message hash: \n");
     for (int k = 0; k < 32; k++)
     {
-        printf("%x", myMessageHash32[k]);
+        //make sure all outputted hexes have 2 digits
+        printf("%02x", myMessageHash32[k]);
     }
     printf("\n\n");
 
@@ -65,7 +92,7 @@ int main()
     printf("Private key: \n");
     for (int j = 0; j < 32; j++)
     {
-        printf("%x", myPrivateKey32[j]);
+        printf("%02x", myPrivateKey32[j]);
     }
     printf("\n\n");
 
@@ -93,7 +120,7 @@ int main()
     printf("Public key: \n");
     for (int m = 0; m < 64; m++)
     {
-        printf("%x", myPublicKey.data[m]);
+        printf("%02x", myPublicKey.data[m]);
     }
     printf("\n\n");
     
@@ -104,7 +131,7 @@ int main()
     printf("Signature: \n");
     for (int i = 0; i < 64; i++)
     {
-        printf("%x", mySig.data[i]);
+        printf("%02x", mySig.data[i]);
     }
     printf("\n\n");
 
