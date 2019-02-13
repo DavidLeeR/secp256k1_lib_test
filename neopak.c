@@ -22,6 +22,14 @@ void random_scalar_order_test_new(secp256k1_scalar *num) {
    } while(1);
 }
 
+//helper function for calculating size of string
+size_t strlen(const char *str)
+{
+    const char *s;
+    for (s = str; *s; ++s);
+    return(s - str);
+}
+
 //displays usage info
 void usage()
 {
@@ -144,11 +152,8 @@ void testSignEcdsa()
     }
 }
 
-int main(int argc, char *argv[]) 
+int main(int argc, char **argv) 
 {
-    char arg1[65];
-    char arg2[65];
-
     //if no args passed, display usage info
     if (argc == 1)
     {
@@ -172,6 +177,10 @@ int main(int argc, char *argv[])
     //production sign
     else if (argc == 3)
     {
+        if (strlen(argv[1]) != 64 || strlen(argv[2]) != 64)
+        {
+            printf("\nError: incorrect usage, private key and message hash must be exaclty 64 chars long\n\n");
+        }
         //call signEcdsa() here after it is implemented
     }
     //else, too many args passed
