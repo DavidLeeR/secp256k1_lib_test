@@ -287,20 +287,12 @@ int main(int argc, char **argv)
         //}
         //call signEcdsa() here after it is implemented
         unsigned char *uSecKey;
-        const char* secKey = argv[1];
+        const char* secKey = insertSpaces(argv[1]);
+
         int length = strlen(argv[1]);
         int *lengthPtr = &length;
         uSecKey = convert(secKey, lengthPtr);
         signEcdsaKeyAndHashArgs(uSecKey);
-
-        //print the test private key
-        /*printf("Private key: \n");
-        for (int j = 0; j < length; j++)
-        {
-            printf("%02x", *uSecKey);
-            uSecKey++;
-        }
-        printf("\n\n");*/
     }
     //else, too many args passed
     else
@@ -328,5 +320,9 @@ LOG
         - usage info added
         - 3 options added to command line (usage, test sign, production sign)
             -prod sign not yet implemented
+        - prod sign half implemented (custom priv key working)
+
+1/14/19 - separated helper functions from neopak.c
+        - private key can now be passed with no spaces
 
 */

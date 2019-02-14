@@ -23,5 +23,8 @@ static unsigned char gethex(const char *s, char **endptr);
 //helper function to convert from string to unsigned char array of hex
 unsigned char *convert(const char *s, int *length);
 
+//insert spaces between each hex number for parsing into unsigned char array
+char* insertSpaces(const char *s);
+
 
 

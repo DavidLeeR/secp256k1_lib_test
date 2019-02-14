@@ -39,8 +39,6 @@ size_t strlen(const char *str)
 //helper function to get hex from string char
 static unsigned char gethex(const char *s, char **endptr) {
  assert(s);
- //if character is whitespace, move on to the next char
- //while (isspace(*s)) s++;
  assert(*s);
  return strtoul(s, endptr, 16);
 }
@@ -57,4 +55,38 @@ unsigned char *convert(const char *s, int *length)
     }
     *length = p - answer;
     return answer;
+}
+
+//insert spaces between each hex number in string
+char* insertSpaces(const char *s)
+{
+    char *returnString = malloc(sizeof(char)*97);
+    int paramStringIndex = 0;
+    
+    //iterate over new array copying the passed array and adding
+    //a space after every 2 chars
+    for (int i = 0; i < 97; i++)
+    {
+        if (i == 96)
+        {
+            returnString[i] = '\0';
+        }
+        else if (i%3 == 0)
+        {
+            returnString[i] = ' ';
+        }
+        else
+        {
+            returnString[i] = s[paramStringIndex];
+            paramStringIndex++;
+        }
+        
+    }
+
+    //for (int i = 0; i < 97; i++)
+    //{
+    //    printf("%c", returnString[i]);
+    //}
+    
+    return returnString;
 }
