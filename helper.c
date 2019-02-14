@@ -80,9 +80,7 @@ char* insertSpaces(const char *s)
             returnString[i] = s[paramStringIndex];
             paramStringIndex++;
         }
-        
     }
-
     //for (int i = 0; i < 97; i++)
     //{
     //    printf("%c", returnString[i]);

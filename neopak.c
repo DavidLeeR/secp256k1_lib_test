@@ -142,7 +142,7 @@ void testSignEcdsa()
 }
 
 //creates an ECDSA signature using the passed in message hash and private key
-void signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
+secp256k1_ecdsa_signature signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
 {
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
@@ -251,11 +251,15 @@ void signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
     {
         printf("Signature could not be verified\n");
     }
+
+    return mySig;
 }
 
 int main(int argc, char **argv) 
 {
-    unsigned char* digest;
+    unsigned char* uDigest;
+    unsigned char* uSecKey;
+    secp256k1_ecdsa_signature signature;
     //digest = malloc(64 *sizeof)
     //if no args passed, display usage info
     if (argc == 1)
@@ -280,19 +284,25 @@ int main(int argc, char **argv)
     //production sign
     else if (argc == 3)
     {
-        //if (strlen(argv[1]) != 64 || strlen(argv[2]) != 64)
-        //{
-        //    printf("\nError: incorrect usage, private key and message hash must be exaclty 64 chars long\n\n");
-        //    return 0;
-        //}
-        //call signEcdsa() here after it is implemented
-        unsigned char *uSecKey;
+        //make sure passed private key and digest are exactly 64 chars long
+        if (strlen(argv[1]) != 64 || strlen(argv[2]) != 64)
+        {
+            printf("\nError: incorrect usage, private key and message hash must be exaclty 64 chars long\n\n");
+            return 0;
+        }
+      
+        //add space between each hex number in private key and digest 
         const char* secKey = insertSpaces(argv[1]);
-
-        int length = strlen(argv[1]);
-        int *lengthPtr = &length;
-        uSecKey = convert(secKey, lengthPtr);
-        signEcdsaKeyAndHashArgs(uSecKey);
+        const char* digest = insertSpaces(argv[2]);
+        int lengthKey = strlen(secKey);
+        int lengthDigest = strlen(digest);
+        int *keyLengthPtr = &lengthKey;
+        int *digestLengthPtr = &lengthKey;
+        //convert args (string) into array of hex numbers stored
+        //as unsigned chars
+        uSecKey = convert(secKey, keyLengthPtr);
+        uDigest = convert(digest, digestLengthPtr);
+        signature = signEcdsaKeyAndHashArgs(uSecKey);
     }
     //else, too many args passed
     else
