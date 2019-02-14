@@ -6,6 +6,7 @@
  * *********************************/
 
 #include <assert.h>
+#include <time.h>
 
 #include "include/secp256k1.h"
 #include "include/scalar.h"
@@ -81,10 +82,42 @@ char* insertSpaces(const char *s)
             paramStringIndex++;
         }
     }
-    //for (int i = 0; i < 97; i++)
-    //{
-    //    printf("%c", returnString[i]);
-    //}
-    
     return returnString;
+}
+
+//prints the secret key, public key, digest, and signature
+void printValues(unsigned char* secKey, unsigned char* pubKey, unsigned char* digest, unsigned char* signature)
+{
+    //print the private key
+    printf("Private key: \n");
+    for (int j = 0; j < 32; j++)
+    {
+        printf("%02x", secKey[j]);
+    }
+    printf("\n\n");
+
+    //print the corresponding public key
+    printf("Public key: \n");
+    for (int m = 0; m < 64; m++)
+    {
+        printf("%02x", pubKey[m]);
+    }
+    printf("\n\n");
+
+    //print the message hash
+    printf("Message hash: \n");
+    for (int k = 0; k < 32; k++)
+    {
+        //make sure all outputted hexes have 2 digits
+        printf("%02x", digest[k]);
+    }
+    printf("\n\n");
+
+    //print signature in hex
+    printf("Signature: \n");
+    for (int i = 0; i < 64; i++)
+    {
+        printf("%02x", signature[i]);
+    }
+    printf("\n\n");
 }

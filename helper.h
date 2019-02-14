@@ -5,6 +5,7 @@
  * Copywrite NeoWare 2019
  * *********************************/
 
+#include <time.h>
 #include "include/secp256k1.h"
 #include "include/scalar.h"
 #include "include/scalar_4x64_impl.h"
@@ -26,5 +27,19 @@ unsigned char *convert(const char *s, int *length);
 //insert spaces between each hex number for parsing into unsigned char array
 char* insertSpaces(const char *s);
 
+//print secret key, public key, digest, and signature
+void printValues(unsigned char* secKey, unsigned char* pubKey, unsigned char* digest, unsigned char* signature);
 
+//for return value from signing function
+struct Tuple {
+    secp256k1_pubkey pubKey;
+    secp256k1_ecdsa_signature signature;
+};
+
+struct Tuple2 {
+    secp256k1_pubkey pubKey;
+    secp256k1_ecdsa_signature signature;
+    unsigned char* secKey;
+    unsigned char* digest;
+};
 

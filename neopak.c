@@ -30,7 +30,7 @@ void usage()
 }
 
 //creates a test ECDSA signature using a test message hash and a test private key
-void testSignEcdsa()
+struct Tuple2 testSignEcdsa()
 {
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
@@ -55,34 +55,16 @@ void testSignEcdsa()
     secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
     secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
 
-    //print the message hash
-    printf("Message hash: \n");
-    for (int k = 0; k < 32; k++)
-    {
-        //make sure all outputted hexes have 2 digits
-        printf("%02x", myMessageHash32[k]);
-    }
-    printf("\n\n");
-
-
     //testing if verify sig will fail if private key manually changed before public key creation
     //EXPECTED RESULT: sig verify should not fail
     //RESULT: verify does not fail
     //myPrivateKey32[0] = 0;
     //myPrivateKey32[5] = 0;
 
-    //print the test private key
-    printf("Private key: \n");
-    for (int j = 0; j < 32; j++)
-    {
-        printf("%02x", myPrivateKey32[j]);
-    }
-    printf("\n\n");
-
     //verify the private key
     if(1 == secp256k1_ec_seckey_verify(myContext, myPrivateKey32))
     {
-        printf("Private key verified\n\n");
+        printf("\nPrivate key verified\n\n");
     }
     else
     {
@@ -98,25 +80,9 @@ void testSignEcdsa()
     {
         printf("Public key could not be created\n\n");
     }
-
-    //print the corresponding public key
-    printf("Public key: \n");
-    for (int m = 0; m < 64; m++)
-    {
-        printf("%02x", myPublicKey.data[m]);
-    }
-    printf("\n\n");
     
     //sign message hash with private key
     secp256k1_ecdsa_sign(myContext, &mySig, myMessageHash32, myPrivateKey32, NULL, NULL);
-
-    //print signature in hex
-    printf("Signature: \n");
-    for (int i = 0; i < 64; i++)
-    {
-        printf("%02x", mySig.data[i]);
-    }
-    printf("\n\n");
 
     //test to see if sig verify will fail if signature manually changed
     //EXPECTED RESULT: sig verify should fail
@@ -139,10 +105,13 @@ void testSignEcdsa()
     {
         printf("Signature could not be verified\n");
     }
+
+    struct Tuple2 returnVals = { myPublicKey, mySig, myPrivateKey32, myMessageHash32};
+    return returnVals;
 }
 
 //creates an ECDSA signature using the passed in message hash and private key
-secp256k1_ecdsa_signature signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
+struct Tuple signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32, unsigned char* myMessageHash32)
 {
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
@@ -155,27 +124,8 @@ secp256k1_ecdsa_signature signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
     //holds four 64 bit uints (0 to 18,446,744,073,709,551,615) in an array
     secp256k1_scalar myMessageHash, myPrivateKey;
     secp256k1_pubkey myPublicKey;
-    unsigned char myMessageHash32[32]; //, myPrivateKey32[32];
     ////this will end up holding the signature
     unsigned char sig[74];
-
-    //generate random message hash and private key?
-    random_scalar_order_test_new(&myMessageHash);
-    //random_scalar_order_test_new(&myPrivateKey);
-    
-    //convert message hash to unsigned char 32 bytes?
-    secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
-    //secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
-
-    //print the message hash
-    printf("Message hash: \n");
-    for (int k = 0; k < 32; k++)
-    {
-        //make sure all outputted hexes have 2 digits
-        printf("%02x", myMessageHash32[k]);
-    }
-    printf("\n\n");
-
 
     //testing if verify sig will fail if private key manually changed before public key creation
     //EXPECTED RESULT: sig verify should not fail
@@ -183,18 +133,10 @@ secp256k1_ecdsa_signature signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
     //myPrivateKey32[0] = 0;
     //myPrivateKey32[5] = 0;
 
-    //print the test private key
-    printf("Private key: \n");
-    for (int j = 0; j < 32; j++)
-    {
-        printf("%02x", myPrivateKey32[j]);
-    }
-    printf("\n\n");
-
     //verify the private key
     if(1 == secp256k1_ec_seckey_verify(myContext, myPrivateKey32))
     {
-        printf("Private key verified\n\n");
+        printf("\nPrivate key verified\n\n");
     }
     else
     {
@@ -210,25 +152,9 @@ secp256k1_ecdsa_signature signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
     {
         printf("Public key could not be created\n\n");
     }
-
-    //print the corresponding public key
-    printf("Public key: \n");
-    for (int m = 0; m < 64; m++)
-    {
-        printf("%02x", myPublicKey.data[m]);
-    }
-    printf("\n\n");
     
     //sign message hash with private key
     secp256k1_ecdsa_sign(myContext, &mySig, myMessageHash32, myPrivateKey32, NULL, NULL);
-
-    //print signature in hex
-    printf("Signature: \n");
-    for (int i = 0; i < 64; i++)
-    {
-        printf("%02x", mySig.data[i]);
-    }
-    printf("\n\n");
 
     //test to see if sig verify will fail if signature manually changed
     //EXPECTED RESULT: sig verify should fail
@@ -252,15 +178,22 @@ secp256k1_ecdsa_signature signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32)
         printf("Signature could not be verified\n");
     }
 
-    return mySig;
+    struct Tuple returnVals = { myPublicKey, mySig};
+    return returnVals;
 }
 
 int main(int argc, char **argv) 
 {
-    unsigned char* uDigest;
-    unsigned char* uSecKey;
-    secp256k1_ecdsa_signature signature;
-    //digest = malloc(64 *sizeof)
+    unsigned char* ucDigest;
+    unsigned char* ucSecKey;
+    unsigned char* ucPubKey;
+    unsigned char* ucSignature;
+    struct Tuple pubKeyAndSig;
+    struct Tuple2 allSigInfo;
+
+    srand(time(NULL));
+
+
     //if no args passed, display usage info
     if (argc == 1)
     {
@@ -273,7 +206,12 @@ int main(int argc, char **argv)
         if(strcmp(argv[1],"test") == 0)
         {
             printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
-            testSignEcdsa();
+            allSigInfo = testSignEcdsa();
+            ucDigest = allSigInfo.digest;
+            ucSecKey = allSigInfo.secKey;
+            ucPubKey = allSigInfo.pubKey.data;
+            ucSignature = allSigInfo.signature.data;
+
         }
         else
         {
@@ -300,9 +238,11 @@ int main(int argc, char **argv)
         int *digestLengthPtr = &lengthKey;
         //convert args (string) into array of hex numbers stored
         //as unsigned chars
-        uSecKey = convert(secKey, keyLengthPtr);
-        uDigest = convert(digest, digestLengthPtr);
-        signature = signEcdsaKeyAndHashArgs(uSecKey);
+        ucSecKey = convert(secKey, keyLengthPtr);
+        ucDigest = convert(digest, digestLengthPtr);
+        pubKeyAndSig = signEcdsaKeyAndHashArgs(ucSecKey, ucDigest);
+        ucPubKey = pubKeyAndSig.pubKey.data;
+        ucSignature = pubKeyAndSig.signature.data;
     }
     //else, too many args passed
     else
@@ -310,29 +250,37 @@ int main(int argc, char **argv)
         printf("\nError: incorrect usage, run program with no args for usage info\n\n");
     }
     
+    //print values
+    printValues(ucSecKey, ucPubKey, ucDigest, ucSignature);
     return 0;
 }
 
 /*
 LOG
 
-1/11/19 - does not compile, needs declarations/implementations for "secp256k1_scaler" and "secp256k1_scalar_get_b32"
+2/11/19 - does not compile, needs declarations/implementations for "secp256k1_scaler" and "secp256k1_scalar_get_b32"
         - compilation works after including more headers and typedef for uint128 in scalar_4_64, need to check output somehow
 
-1/12/19 - compiles and outputs signature
+2/12/19 - compiles and outputs signature
         - need to verify signature and customize inputs to signature function
         - debug statements added
         - verify signature implemented
         - priv/pub key creation, signing, and verification seemingly working
 
-1/13/19 - printing of hex's fixed
+2/13/19 - printing of hex's fixed
         - testSign function separated from main()
         - usage info added
         - 3 options added to command line (usage, test sign, production sign)
             -prod sign not yet implemented
         - prod sign half implemented (custom priv key working)
 
-1/14/19 - separated helper functions from neopak.c
+2/14/19 - separated helper functions from neopak.c
         - private key can now be passed with no spaces
-
+        - digest can now be passed with no spaces
+        - input validation for length of digest and priv key added
+        - placed printing values into separate function
 */
+
+//TEST WITH THIS:
+//private key: 6f910beb039b93eba3bf95eb9ab2610855f18a7512463c78bc9ebf774535e89f
+//digest: 33ad0a1c607ec03b09e6cd9893680ce210adf300aa1f2660e1b22e10f170f92a
