@@ -1,5 +1,5 @@
 CC = gcc
-OBJ = neopak.o
+OBJ = neopak.o helper.o
 LDIR = lib
 LIBS = -L $(LDIR) -l secp256k1
 
@@ -8,6 +8,9 @@ neopak: $(OBJ)
 
 neopak.o: neopak.c 
 	$(CC) -c neopak.c
+
+helper.o: helper.c
+	$(CC) -c helper.c
 
 clean:
 	rm *.o 
