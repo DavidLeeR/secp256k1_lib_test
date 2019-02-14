@@ -27,6 +27,7 @@ void usage()
     printf("./neopak                                  Show usage info\n");
     printf("./neopak test                             Sign with test priv key and message hash\n");
     printf("./neopak <privKey> <messageHash>          Sign with provided priv key and message hash\n");
+    printf("\n *Note: <privKey> and <messageHash> must be supplied \n        as a string of hex numbers with length 64\n\n");
 }
 
 //creates a test ECDSA signature using a test message hash and a test private key
@@ -69,6 +70,7 @@ struct Tuple2 testSignEcdsa()
     else
     {
         printf("Private key failed verification\n\n");
+        exit(1);
     }
 
     //construct the corresponding public key
@@ -79,6 +81,7 @@ struct Tuple2 testSignEcdsa()
     else
     {
         printf("Public key could not be created\n\n");
+        exit(1);
     }
     
     //sign message hash with private key
@@ -104,6 +107,7 @@ struct Tuple2 testSignEcdsa()
     else
     {
         printf("Signature could not be verified\n");
+        exit(1);
     }
 
     struct Tuple2 returnVals = { myPublicKey, mySig, myPrivateKey32, myMessageHash32};
@@ -141,6 +145,7 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32, unsigned cha
     else
     {
         printf("Private key failed verification\n\n");
+        exit(1);
     }
 
     //construct the corresponding public key
@@ -151,6 +156,7 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32, unsigned cha
     else
     {
         printf("Public key could not be created\n\n");
+        exit(1);
     }
     
     //sign message hash with private key
@@ -176,6 +182,7 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32, unsigned cha
     else
     {
         printf("Signature could not be verified\n");
+        exit(1);
     }
 
     struct Tuple returnVals = { myPublicKey, mySig};
@@ -198,7 +205,7 @@ int main(int argc, char **argv)
     if (argc == 1)
     {
         usage();
-        return 0;
+        exit(0);
     }
     //if only "test" is passed as arg, start test sign
     else if (argc == 2)
@@ -216,6 +223,7 @@ int main(int argc, char **argv)
         else
         {
             printf("\nError: incorrect usage, run program with no args for usage info\n\n");
+            exit(1);
         }
     }
     //if private key and message hash are passed as args, start
@@ -226,7 +234,7 @@ int main(int argc, char **argv)
         if (strlen(argv[1]) != 64 || strlen(argv[2]) != 64)
         {
             printf("\nError: incorrect usage, private key and message hash must be exaclty 64 chars long\n\n");
-            return 0;
+            exit(0);
         }
       
         //add space between each hex number in private key and digest 
@@ -248,6 +256,7 @@ int main(int argc, char **argv)
     else
     {
         printf("\nError: incorrect usage, run program with no args for usage info\n\n");
+        exit(1);
     }
     
     //print values
