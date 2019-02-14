@@ -1,16 +1,19 @@
 CC = gcc
-OBJ = test.o
+OBJ = neopak.o helper.o
 LDIR = lib
 LIBS = -L $(LDIR) -l secp256k1
 
-test: $(OBJ)
-	$(CC) -o test $(OBJ) $(LIBS)
+neopak: $(OBJ)
+	$(CC) -o neopak $(OBJ) $(LIBS)
 
-test.o: test.c 
-	$(CC) -c test.c
+neopak.o: neopak.c 
+	$(CC) -c neopak.c
+
+helper.o: helper.c
+	$(CC) -c helper.c
 
 clean:
 	rm *.o 
 
 uninstall:
-	rm test
+	rm neopak
