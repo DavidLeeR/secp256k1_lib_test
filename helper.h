@@ -28,7 +28,7 @@ unsigned char *convert(const char *s, int *length);
 char* insertSpaces(const char *s);
 
 //print secret key, public key, digest, and signature
-void printValues(unsigned char* secKey, unsigned char* pubKey, unsigned char* digest, unsigned char* signature);
+void printValues(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature);
 
 //for return value from signing function
 struct Tuple {
@@ -37,8 +37,9 @@ struct Tuple {
 };
 
 struct Tuple2 {
-    secp256k1_pubkey pubKey;
     secp256k1_ecdsa_signature signature;
+    unsigned char* pubKeyComp;
+    unsigned char* pubKeyUncomp;
     unsigned char* secKey;
     unsigned char* digest;
 };

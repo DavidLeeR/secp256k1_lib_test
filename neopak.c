@@ -38,15 +38,22 @@ struct Tuple2 testSignEcdsa()
     line 150*/
 
     //setup params needed for signing function
-    ////set to both sign and verify
+    //set to both sign and verify
     secp256k1_context *myContext = secp256k1_context_create(SECP256K1_CONTEXT_SIGN| SECP256K1_CONTEXT_VERIFY); 
     secp256k1_ecdsa_signature mySig;
     //holds four 64 bit uints (0 to 18,446,744,073,709,551,615) in an array
     secp256k1_scalar myMessageHash, myPrivateKey;
     secp256k1_pubkey myPublicKey;
     unsigned char myMessageHash32[32], myPrivateKey32[32];
-    ////this will end up holding the signature
+    //this will end up holding the signature
     unsigned char sig[74];
+    //for serialized pub key
+    unsigned char* myPubKey_serialized_compressed;
+    unsigned char* myPubKey_serialized_uncompressed;
+    myPubKey_serialized_compressed = malloc(sizeof(unsigned char)*33);
+    myPubKey_serialized_uncompressed = malloc(sizeof(unsigned char)*65);
+    size_t pubKeyCompLen;
+    size_t pubKeyUncompLen;
 
     //generate random message hash and private key?
     random_scalar_order_test_new(&myMessageHash);
@@ -56,11 +63,15 @@ struct Tuple2 testSignEcdsa()
     secp256k1_scalar_get_b32(myMessageHash32, &myMessageHash);
     secp256k1_scalar_get_b32(myPrivateKey32, &myPrivateKey);
 
-    //testing if verify sig will fail if private key manually changed before public key creation
-    //EXPECTED RESULT: sig verify should not fail
-    //RESULT: verify does not fail
-    //myPrivateKey32[0] = 0;
-    //myPrivateKey32[5] = 0;
+    //DEBUG
+    //print the message hash
+    printf("Message hash: \n");
+    for (int r = 0; r < 32; r++)
+    {
+        //make sure all outputted hexes have 2 digits
+        printf("%02x", myMessageHash32[r]);
+    }
+    printf("\n\n");
 
     //verify the private key
     if(1 == secp256k1_ec_seckey_verify(myContext, myPrivateKey32))
@@ -83,26 +94,44 @@ struct Tuple2 testSignEcdsa()
         printf("Public key could not be created\n\n");
         exit(1);
     }
+
+    //get seralized public key (compressed)
+    pubKeyCompLen = 33;
+    secp256k1_ec_pubkey_serialize(myContext, myPubKey_serialized_compressed, &pubKeyCompLen, &myPublicKey, SECP256K1_EC_COMPRESSED);
+    secp256k1_pubkey pubkeytest0;
+    if (1 == secp256k1_ec_pubkey_parse(myContext, &pubkeytest0, myPubKey_serialized_compressed, pubKeyCompLen)) 
+    {
+        printf("\ncompressed public key able to be parsed\n\n");
+    }
+    else
+    {
+        printf("error parsing compressed public key\n");
+        exit(1);
+    }
+
+    //get seralized public key (uncompressed)
+    pubKeyUncompLen = 65;
+    secp256k1_ec_pubkey_serialize(myContext, myPubKey_serialized_uncompressed, &pubKeyUncompLen, &myPublicKey, SECP256K1_EC_UNCOMPRESSED);
+    secp256k1_pubkey pubkeytest1;
+    if (1 == secp256k1_ec_pubkey_parse(myContext, &pubkeytest1, myPubKey_serialized_uncompressed, pubKeyUncompLen)) 
+    {
+        printf("\nuncompressed public key able to be parsed\n\n");
+    }
+    else
+    {
+        printf("error parsing uncompressed public key\n");
+        exit(1);
+    }
+    
+    
     
     //sign message hash with private key
     secp256k1_ecdsa_sign(myContext, &mySig, myMessageHash32, myPrivateKey32, NULL, NULL);
 
-    //test to see if sig verify will fail if signature manually changed
-    //EXPECTED RESULT: sig verify should fail
-    //RESULT: sig verify fails
-    //mySig.data[0] = 0;
-    //mySig.data[5] = 0;
-
-    //test to see if sig verify will fail if public key manually changed after signing
-    //EXPECTED RESULT: sig verify should fail
-    //RESULT: sig verify fails
-    //myPublicKey.data[0] = 0;
-    //myPublicKey.data[5] = 0;
-
     //verify signature
     if (1 == secp256k1_ecdsa_verify(myContext, &mySig, myMessageHash32, &myPublicKey))
     {
-        printf("Signature verified\n");
+        printf("Signature verified\n\n");
     }
     else
     {
@@ -110,7 +139,18 @@ struct Tuple2 testSignEcdsa()
         exit(1);
     }
 
-    struct Tuple2 returnVals = { myPublicKey, mySig, myPrivateKey32, myMessageHash32};
+    //DEBUG
+    //print the message hash
+    printf("Message hash: \n");
+    for (int r = 0; r < 32; r++)
+    {
+        //make sure all outputted hexes have 2 digits
+        printf("%02x", myMessageHash32[r]);
+    }
+    printf("\n\n");
+
+    //return signature, public key, private key, and message hash
+    struct Tuple2 returnVals = { mySig, myPubKey_serialized_compressed, myPubKey_serialized_uncompressed, myPrivateKey32, myMessageHash32 };
     return returnVals;
 }
 
@@ -177,7 +217,7 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32, unsigned cha
     //verify signature
     if (1 == secp256k1_ecdsa_verify(myContext, &mySig, myMessageHash32, &myPublicKey))
     {
-        printf("Signature verified\n");
+        printf("Signature verified\n\n");
     }
     else
     {
@@ -191,10 +231,11 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* myPrivateKey32, unsigned cha
 
 int main(int argc, char **argv) 
 {
-    unsigned char* ucDigest;
-    unsigned char* ucSecKey;
-    unsigned char* ucPubKey;
-    unsigned char* ucSignature;
+    unsigned char* serializedDigest;
+    unsigned char* serializedSecKey;
+    unsigned char* serializedPubKeyCompressed;
+    unsigned char* serializedPubKeyUncompressed;
+    unsigned char* serializedSignature;
     struct Tuple pubKeyAndSig;
     struct Tuple2 allSigInfo;
 
@@ -212,12 +253,13 @@ int main(int argc, char **argv)
     {
         if(strcmp(argv[1],"test") == 0)
         {
-            printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
+            printf("\nStarting signing test with test pub/priv keys and test message hash\n");
             allSigInfo = testSignEcdsa();
-            ucDigest = allSigInfo.digest;
-            ucSecKey = allSigInfo.secKey;
-            ucPubKey = allSigInfo.pubKey.data;
-            ucSignature = allSigInfo.signature.data;
+            serializedDigest = allSigInfo.digest;
+            serializedSecKey = allSigInfo.secKey;
+            serializedPubKeyCompressed = allSigInfo.pubKeyComp;
+            serializedPubKeyUncompressed = allSigInfo.pubKeyUncomp;
+            serializedSignature = allSigInfo.signature.data;
 
         }
         else
@@ -246,11 +288,11 @@ int main(int argc, char **argv)
         int *digestLengthPtr = &lengthKey;
         //convert args (string) into array of hex numbers stored
         //as unsigned chars
-        ucSecKey = convert(secKey, keyLengthPtr);
-        ucDigest = convert(digest, digestLengthPtr);
-        pubKeyAndSig = signEcdsaKeyAndHashArgs(ucSecKey, ucDigest);
-        ucPubKey = pubKeyAndSig.pubKey.data;
-        ucSignature = pubKeyAndSig.signature.data;
+        serializedSecKey = convert(secKey, keyLengthPtr);
+        serializedDigest = convert(digest, digestLengthPtr);
+        pubKeyAndSig = signEcdsaKeyAndHashArgs(serializedSecKey, serializedDigest);
+        //serializedPubKey = pubKeyAndSig.pubKey.data;
+        serializedSignature = pubKeyAndSig.signature.data;
     }
     //else, too many args passed
     else
@@ -260,7 +302,7 @@ int main(int argc, char **argv)
     }
     
     //print values
-    printValues(ucSecKey, ucPubKey, ucDigest, ucSignature);
+    printValues(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
     return 0;
 }
 
