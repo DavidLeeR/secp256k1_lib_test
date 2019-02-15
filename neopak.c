@@ -31,123 +31,16 @@ void usage()
 }
 
 //DESC: 
-// Creates a **TEST** ECDSA signature using a test message hash and a **TEST** private key
-//PARAMS:
-// 1)secKey - will hold serialized secret key (gets generated in this func)
-// 2)pubKeyComp - will hold serialized compressed pub key (gets derived from private key in this func)
-// 3)pubKeyUncomp - will hold will hold serialized uncompressed pub key (gets derived from private key in this func)
-// 4)digest - will hold the serialized message digest (gets generated in this function)
-// 5)signature - will hold the serialized signature (gets created in this function)
-//OUTPUT:
-// secKey, pubKeyComp, pubKeyUncomp, digest, signature
-int testSignEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature)
-{
-    /*a general template for this function can be found in 
-    go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
-    line 150*/
-
-    //setup params needed for signing function
-    //set to both sign and verify
-    secp256k1_context *myContext = secp256k1_context_create(SECP256K1_CONTEXT_SIGN| SECP256K1_CONTEXT_VERIFY); 
-    secp256k1_ecdsa_signature mySig;
-    //holds four 64 bit uints (0 to 18,446,744,073,709,551,615) in an array
-    secp256k1_scalar myMessageHash, myPrivateKey;
-    secp256k1_pubkey myPublicKey;
-    size_t pubKeyCompLen;
-    size_t pubKeyUncompLen;
-
-    //generate random message hash and private key?
-    random_scalar_order_test_new(&myMessageHash);
-    random_scalar_order_test_new(&myPrivateKey);
-    
-    //convert message hash to unsigned char 32 bytes?
-    secp256k1_scalar_get_b32(digest, &myMessageHash);
-    secp256k1_scalar_get_b32(secKey, &myPrivateKey);
-
-    //verify the private key
-    if(1 == secp256k1_ec_seckey_verify(myContext, secKey))
-    {
-        printf("Private key verified\n\n");
-    }
-    else
-    {
-        printf("Private key failed verification\n\n");
-        exit(1);
-    }
-
-    //construct the corresponding public key
-    if(1 == secp256k1_ec_pubkey_create(myContext, &myPublicKey, secKey))
-    {
-        printf("Public key created\n\n");
-    }
-    else
-    {
-        printf("Public key could not be created\n\n");
-        exit(1);
-    }
-
-    //get seralized public key (compressed)
-    pubKeyCompLen = 33;
-    secp256k1_ec_pubkey_serialize(myContext, pubKeyComp, &pubKeyCompLen, &myPublicKey, SECP256K1_EC_COMPRESSED);
-    secp256k1_pubkey pubkeytest0;
-    if (1 == secp256k1_ec_pubkey_parse(myContext, &pubkeytest0, pubKeyComp, pubKeyCompLen)) 
-    {
-        printf("Compressed public key able to be parsed\n\n");
-    }
-    else
-    {
-        printf("Error parsing compressed public key\n\n");
-        exit(1);
-    }
-
-    //get seralized public key (uncompressed)
-    pubKeyUncompLen = 65;
-    secp256k1_ec_pubkey_serialize(myContext, pubKeyUncomp, &pubKeyUncompLen, &myPublicKey, SECP256K1_EC_UNCOMPRESSED);
-    secp256k1_pubkey pubkeytest1;
-    if (1 == secp256k1_ec_pubkey_parse(myContext, &pubkeytest1, pubKeyUncomp, pubKeyUncompLen)) 
-    {
-        printf("Uncompressed public key able to be parsed\n\n");
-    }
-    else
-    {
-        printf("Error parsing uncompressed public key\n\n");
-        exit(1);
-    }
-    
-    //sign message hash with private key
-    secp256k1_ecdsa_sign(myContext, &mySig, digest, secKey, NULL, NULL);
-
-    //verify signature
-    if (1 == secp256k1_ecdsa_verify(myContext, &mySig, digest, &myPublicKey))
-    {
-        printf("Signature verified\n\n");
-    }
-    else
-    {
-        printf("Signature could not be verified\n\n");
-        exit(1);
-    }
-
-    //copy data of signature into hex array
-    for (int x = 0; x < 74; x++)
-    {
-        signature[x] = mySig.data[x];
-    }
-
-    return 1;
-}
-
-//DESC: 
 // Creates an ECDSA signature using a passed in message hash and private key
 //PARAMS:
 // 1)secKey - holds serialized secret key (console arg provided by user)
 // 2)pubKeyComp - will hold serialized compressed pub key (gets derived from private key in this func)
-// 3)pubKeyUncomp - will hold will hold serialized uncompressed pub key (gets derived from private key in this func)
+// 3)pubKeyUncomp - will hold will hold serialized uncompressed pub key (gets derived from mprivate key in this func)
 // 4)digest - holds serialized message digest (console arg provided by user)
 // 5)signature - will hold the serialized signature (gets created in this function)
 //OUTPUT:
 // pubKeyComp, pubKeyUncomp, signature
-int signEcdsaKeyAndHashArgs(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature)
+int signEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature)
 {
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
@@ -249,6 +142,8 @@ int main(int argc, char **argv)
     serializedPubKeyUncompressed = malloc(sizeof(unsigned char)*65);
     serializedSignature = malloc(sizeof(unsigned char)*74);
 
+    secp256k1_scalar myMessageHash, myPrivateKey;
+
     srand(time(NULL));
 
     //if no args passed, display usage info
@@ -263,8 +158,14 @@ int main(int argc, char **argv)
         if(strcmp(argv[1],"test") == 0)
         {
             printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
-            testSignEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
-
+            //generate random message hash and private key?
+            random_scalar_order_test_new(&myMessageHash);
+            random_scalar_order_test_new(&myPrivateKey);
+            
+            //convert message hash to unsigned char 32 bytes?
+            secp256k1_scalar_get_b32(serializedDigest, &myMessageHash);
+            secp256k1_scalar_get_b32(serializedSecKey, &myPrivateKey);
+            signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
         }
         else
         {
@@ -294,7 +195,7 @@ int main(int argc, char **argv)
         //as unsigned chars
         serializedSecKey = convert(secKey, keyLengthPtr);
         serializedDigest = convert(digest, digestLengthPtr);
-        signEcdsaKeyAndHashArgs(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
+        signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
     }
     //else, too many args passed
     else
@@ -310,4 +211,7 @@ int main(int argc, char **argv)
 
 //TEST WITH THIS:
 //private key: 6f910beb039b93eba3bf95eb9ab2610855f18a7512463c78bc9ebf774535e89f
-//digest: 33ad0a1c607ec03b09e6cd9893680ce210adf300aa1f2660e1b22e10f170f92a
+//digest: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+//message: hello
+
+//**Message has no spaces
