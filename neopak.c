@@ -143,7 +143,8 @@ int main(int argc, char **argv)
     serializedPubKeyCompressed = malloc(sizeof(unsigned char)*33);
     serializedPubKeyUncompressed = malloc(sizeof(unsigned char)*65);
     serializedSignatureComp = malloc(sizeof(unsigned char)*64);
-    serializedSignatureDer = malloc(sizeof(unsigned char)*68);
+    //72 is max length for DER sig, but can be shorters
+    serializedSignatureDer = malloc(sizeof(unsigned char)*72);
 
     secp256k1_scalar myMessageHash, myPrivateKey;
 

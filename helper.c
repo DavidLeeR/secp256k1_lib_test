@@ -131,7 +131,7 @@ void printValues(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char
 
     //print signature in hex
     printf("Signature (DER encoded): \n");
-    for (int i = 0; i < 68; i++)
+    for (int i = 0; i < 72; i++)
     {
         printf("%02x", signatureDer[i]);
     }
