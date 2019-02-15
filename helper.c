@@ -86,46 +86,54 @@ char* insertSpaces(const char *s)
 }
 
 //prints the secret key, public key, digest, and signature
-void printValues(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature)
+void printValues(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signatureComp, unsigned char* signatureDer)
 {
     //print the private key
     printf("Private key: \n");
-    for (int j = 0; j < 32; j++)
+    for (int i = 0; i < 32; i++)
     {
-        printf("%02x", secKey[j]);
+        printf("%02x", secKey[i]);
     }
     printf("\n\n");
 
     //print the corresponding public key (compressed)
     printf("Public key (compressed): \n");
-    for (int m = 0; m < 33; m++)
+    for (int i = 0; i < 33; i++)
     {
-        printf("%02x", pubKeyComp[m]);
+        printf("%02x", pubKeyComp[i]);
     }
     printf("\n\n");
 
     //print the corresponding public key (uncompressed)
     printf("Public key (uncompressed): \n");
-    for (int q = 0; q < 65; q++)
+    for (int i = 0; i < 65; i++)
     {
-        printf("%02x", pubKeyUncomp[q]);
+        printf("%02x", pubKeyUncomp[i]);
     }
     printf("\n\n");
 
     //print the message hash
     printf("Message hash: \n");
-    for (int r = 0; r < 32; r++)
+    for (int i = 0; i < 32; i++)
     {
         //make sure all outputted hexes have 2 digits
-        printf("%02x", digest[r]);
+        printf("%02x", digest[i]);
     }
     printf("\n\n");
 
     //print signature in hex
-    printf("Signature: \n");
+    printf("Signature (compact): \n");
     for (int i = 0; i < 64; i++)
     {
-        printf("%02x", signature[i]);
+        printf("%02x", signatureComp[i]);
+    }
+    printf("\n\n");
+
+    //print signature in hex
+    printf("Signature (DER encoded): \n");
+    for (int i = 0; i < 68; i++)
+    {
+        printf("%02x", signatureDer[i]);
     }
     printf("\n\n");
 }

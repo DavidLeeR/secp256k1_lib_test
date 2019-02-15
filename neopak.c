@@ -37,10 +37,11 @@ void usage()
 // 2)pubKeyComp - will hold serialized compressed pub key (gets derived from private key in this func)
 // 3)pubKeyUncomp - will hold will hold serialized uncompressed pub key (gets derived from mprivate key in this func)
 // 4)digest - holds serialized message digest (console arg provided by user)
-// 5)signature - will hold the serialized signature (gets created in this function)
+// 5)signatureComp - will hold the serialized compressed signature (gets created in this function)
+// 6)signatureDer - will hold the serialized DER signature (gets created in this function)
 //OUTPUT:
 // pubKeyComp, pubKeyUncomp, signature
-int signEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature)
+int signEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signatureComp, unsigned char* signatureDer)
 {
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
@@ -120,11 +121,11 @@ int signEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* p
         exit(1);
     }
 
-    //copy data of signature into hex array
-    for (int x = 0; x < 74; x++)
-    {
-        signature[x] = mySig.data[x];
-    }
+    //serialize signature in compact form
+    secp256k1_ecdsa_signature_serialize_compact(myContext, signatureComp, &mySig);
+    //serialize signature in compact form
+    size_t derLen = 72;
+    secp256k1_ecdsa_signature_serialize_der(myContext, signatureDer, &derLen, &mySig);
 
     return 1;
 }
@@ -135,12 +136,14 @@ int main(int argc, char **argv)
     unsigned char* serializedSecKey;
     unsigned char* serializedPubKeyCompressed;
     unsigned char* serializedPubKeyUncompressed;
-    unsigned char* serializedSignature;
+    unsigned char* serializedSignatureComp;
+    unsigned char* serializedSignatureDer;
     serializedDigest = malloc(sizeof(unsigned char)*32);
     serializedSecKey = malloc(sizeof(unsigned char)*32);
     serializedPubKeyCompressed = malloc(sizeof(unsigned char)*33);
     serializedPubKeyUncompressed = malloc(sizeof(unsigned char)*65);
-    serializedSignature = malloc(sizeof(unsigned char)*74);
+    serializedSignatureComp = malloc(sizeof(unsigned char)*64);
+    serializedSignatureDer = malloc(sizeof(unsigned char)*68);
 
     secp256k1_scalar myMessageHash, myPrivateKey;
 
@@ -165,7 +168,7 @@ int main(int argc, char **argv)
             //convert message hash to unsigned char 32 bytes?
             secp256k1_scalar_get_b32(serializedDigest, &myMessageHash);
             secp256k1_scalar_get_b32(serializedSecKey, &myPrivateKey);
-            signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
+            signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
         }
         else
         {
@@ -195,7 +198,7 @@ int main(int argc, char **argv)
         //as unsigned chars
         serializedSecKey = convert(secKey, keyLengthPtr);
         serializedDigest = convert(digest, digestLengthPtr);
-        signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
+        signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
     }
     //else, too many args passed
     else
@@ -205,7 +208,7 @@ int main(int argc, char **argv)
     }
     
     //print values
-    printValues(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
+    printValues(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
     return 0;
 }
 
