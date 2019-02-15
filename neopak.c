@@ -127,6 +127,30 @@ int signEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* p
     size_t derLen = 72;
     secp256k1_ecdsa_signature_serialize_der(myContext, signatureDer, &derLen, &mySig);
 
+    //check if compact signature can be parsed
+    secp256k1_ecdsa_signature sigTest0;
+    if (1 == secp256k1_ecdsa_signature_parse_compact(myContext, &sigTest0, signatureComp))
+    {
+        printf("Compact signature able to be parsed\n\n");
+    }
+    else
+    {
+        printf("Compact signature could not be parsed\n\n");
+        exit(1);
+    }
+
+    //check if DER encoded signature can be parsed
+    secp256k1_ecdsa_signature sigTest1;
+    if (1 == secp256k1_ecdsa_signature_parse_der(myContext, &sigTest1, signatureDer, derLen))
+    {
+        printf("DER encoded signature able to be parsed\n\n");
+    }
+    else
+    {
+        printf("DER encoded signature could not be parsed\n\n");
+        exit(1);
+    }
+    
     return 1;
 }
 
