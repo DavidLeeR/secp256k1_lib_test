@@ -83,11 +83,11 @@ int testSignEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned cha
     secp256k1_pubkey pubkeytest0;
     if (1 == secp256k1_ec_pubkey_parse(myContext, &pubkeytest0, pubKeyComp, pubKeyCompLen)) 
     {
-        printf("compressed public key able to be parsed\n\n");
+        printf("Compressed public key able to be parsed\n\n");
     }
     else
     {
-        printf("error parsing compressed public key\n\n");
+        printf("Error parsing compressed public key\n\n");
         exit(1);
     }
 
@@ -97,11 +97,11 @@ int testSignEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned cha
     secp256k1_pubkey pubkeytest1;
     if (1 == secp256k1_ec_pubkey_parse(myContext, &pubkeytest1, pubKeyUncomp, pubKeyUncompLen)) 
     {
-        printf("uncompressed public key able to be parsed\n\n");
+        printf("Uncompressed public key able to be parsed\n\n");
     }
     else
     {
-        printf("error parsing uncompressed public key\n\n");
+        printf("Error parsing uncompressed public key\n\n");
         exit(1);
     }
     
@@ -145,12 +145,6 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* secKey, unsigned char* diges
     ////this will end up holding the signature
     unsigned char sig[74];
 
-    //testing if verify sig will fail if private key manually changed before public key creation
-    //EXPECTED RESULT: sig verify should not fail
-    //RESULT: verify does not fail
-    //secKey[0] = 0;
-    //secKey[5] = 0;
-
     //verify the private key
     if(1 == secp256k1_ec_seckey_verify(myContext, secKey))
     {
@@ -175,18 +169,6 @@ struct Tuple signEcdsaKeyAndHashArgs(unsigned char* secKey, unsigned char* diges
     
     //sign message hash with private key
     secp256k1_ecdsa_sign(myContext, &mySig, digest, secKey, NULL, NULL);
-
-    //test to see if sig verify will fail if signature manually changed
-    //EXPECTED RESULT: sig verify should fail
-    //RESULT: sig verify fails
-    //mySig.data[0] = 0;
-    //mySig.data[5] = 0;
-
-    //test to see if sig verify will fail if public key manually changed after signing
-    //EXPECTED RESULT: sig verify should fail
-    //RESULT: sig verify fails
-    //myPublicKey.data[0] = 0;
-    //myPublicKey.data[5] = 0;
 
     //verify signature
     if (1 == secp256k1_ecdsa_verify(myContext, &mySig, digest, &myPublicKey))
@@ -216,7 +198,6 @@ int main(int argc, char **argv)
     serializedPubKeyUncompressed = malloc(sizeof(unsigned char)*65);
     serializedSignature = malloc(sizeof(unsigned char)*74);
     struct Tuple pubKeyAndSig;
-    struct Tuple2 allSigInfo;
 
     srand(time(NULL));
 
@@ -279,32 +260,6 @@ int main(int argc, char **argv)
     printValues(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignature);
     return 0;
 }
-
-/*
-LOG
-
-2/11/19 - does not compile, needs declarations/implementations for "secp256k1_scaler" and "secp256k1_scalar_get_b32"
-        - compilation works after including more headers and typedef for uint128 in scalar_4_64, need to check output somehow
-
-2/12/19 - compiles and outputs signature
-        - need to verify signature and customize inputs to signature function
-        - debug statements added
-        - verify signature implemented
-        - priv/pub key creation, signing, and verification seemingly working
-
-2/13/19 - printing of hex's fixed
-        - testSign function separated from main()
-        - usage info added
-        - 3 options added to command line (usage, test sign, production sign)
-            -prod sign not yet implemented
-        - prod sign half implemented (custom priv key working)
-
-2/14/19 - separated helper functions from neopak.c
-        - private key can now be passed with no spaces
-        - digest can now be passed with no spaces
-        - input validation for length of digest and priv key added
-        - placed printing values into separate function
-*/
 
 //TEST WITH THIS:
 //private key: 6f910beb039b93eba3bf95eb9ab2610855f18a7512463c78bc9ebf774535e89f

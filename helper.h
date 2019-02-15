@@ -35,12 +35,3 @@ struct Tuple {
     secp256k1_pubkey pubKey;
     secp256k1_ecdsa_signature signature;
 };
-
-struct Tuple2 {
-    secp256k1_ecdsa_signature signature;
-    unsigned char* pubKeyComp;
-    unsigned char* pubKeyUncomp;
-    unsigned char* secKey;
-    unsigned char* digest;
-};
-
