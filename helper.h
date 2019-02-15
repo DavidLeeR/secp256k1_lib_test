@@ -30,8 +30,3 @@ char* insertSpaces(const char *s);
 //print secret key, public key, digest, and signature
 void printValues(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signature);
 
-//for return value from signing function
-struct Tuple {
-    secp256k1_pubkey pubKey;
-    secp256k1_ecdsa_signature signature;
-};
