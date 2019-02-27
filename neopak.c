@@ -26,8 +26,9 @@ enum commands{usage, testSign, sign}command;
 void DisplayUsageInfo();
 enum commands ParseArgumentsIntoCommand(int paramArgc);
 void ExecuteCommand(char **paramArgs, enum commands paramCommand);
+char* ReadFileIntoByteArray(char *paramFileName);
 void CompleteTestSigProcess();
-void CompleteSigProcess(char **paramArgv);
+void CompleteSigProcess(char *paramSecKey, char *paramFileName);
 int VerifyParamsAndSignMessageWithEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signatureComp, unsigned char* signatureDer);
 
 
@@ -81,7 +82,7 @@ void ExecuteCommand(char **paramArgs, enum commands paramCommand)
             CompleteTestSigProcess();
             break;
         case sign:
-            CompleteSigProcess(paramArgs);
+            CompleteSigProcess(paramArgs[1], paramArgs[2]);
             break;
     }
 }
@@ -133,8 +134,10 @@ void CompleteTestSigProcess()
 //  -serialized message digest
 //  -serialized compressed signature
 //  -serialized signature in DER format
-void CompleteSigProcess(char **paramArgv)
+void CompleteSigProcess(char *paramSecKey, char *paramFileName)
 {
+    readFileIntoByteArray(paramFileName);
+    /*
     unsigned char* serializedDigest;
     unsigned char* serializedSecKey;
     unsigned char* serializedPubKeyCompressed;
@@ -151,15 +154,15 @@ void CompleteSigProcess(char **paramArgv)
     secp256k1_scalar myMessageHash, myPrivateKey;
 
     //make sure passed private key and digest are exactly 64 chars long
-    if (strlen(paramArgv[1]) != 64 || strlen(paramArgv[2]) != 64)
+    if (strlen(paramSecKey) != 64)
     {
         printf("\nError: incorrect usage, private key and message hash must be exaclty 64 chars long\n\n");
         exit(0);
     }
     
     //add space between each hex number in private key and digest 
-    const char* secKey = insertSpaces(paramArgv[1]);
-    const char* digest = insertSpaces(paramArgv[2]);
+    const char* secKey = insertSpaces(paramSecKey);
+    const char* digest = insertSpaces(paramDigest);
     int lengthKey = strlen(secKey);
     int lengthDigest = strlen(digest);
     int *keyLengthPtr = &lengthKey;
@@ -172,6 +175,7 @@ void CompleteSigProcess(char **paramArgv)
     VerifyParamsAndSignMessageWithEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
 
     printValues(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
+    */
 }
 
 
