@@ -19,6 +19,7 @@
 #include "helper.h"
 #include "sha.h"
 
+<<<<<<< HEAD
 
 //global
 enum commands{usage, testSign, sign}command;
@@ -35,6 +36,10 @@ int VerifyParamsAndSignMessageWithEcdsa(unsigned char* secKey, unsigned char* pu
 
 
 void DisplayUsageInfo()
+=======
+//displays usage info
+void usage()
+>>>>>>> parent of 69c036c... code refactor
 {
     printf("\nNeoPak\nCopywrite NeoWare 2019\n");
     printf("Created by David Lee Ramirez 2/12/2019\n\n");
@@ -45,6 +50,7 @@ void DisplayUsageInfo()
     printf("\n *Note: <privKey> and <messageHash> must be supplied \n        as a string of hex numbers with length 64\n\n");
 }
 
+<<<<<<< HEAD
 
 enum commands ParseArgumentsIntoCommand(int paramArgc)
 {
@@ -210,6 +216,8 @@ char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileConten
 
 }
 
+=======
+>>>>>>> parent of 69c036c... code refactor
 //DESC: 
 // Creates an ECDSA signature using a passed in message hash and private key
 //PARAMS:
@@ -220,8 +228,8 @@ char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileConten
 // 5)signatureComp - will hold the serialized compressed signature (gets created in this function)
 // 6)signatureDer - will hold the serialized DER signature (gets created in this function)
 //OUTPUT:
-// pubKeyComp, pubKeyUncomp, signatureComp, signatureDer
-int VerifyParamsAndSignMessageWithEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signatureComp, unsigned char* signatureDer)
+// pubKeyComp, pubKeyUncomp, signature
+int signEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signatureComp, unsigned char* signatureDer)
 {
     /*a general template for this function can be found in 
     go-ethereum-master\crypto\secp256k1\libsecp256k1\src\modules\recovery\tests_impl.h
@@ -289,7 +297,6 @@ int VerifyParamsAndSignMessageWithEcdsa(unsigned char* secKey, unsigned char* pu
     
     //sign message hash with private key
     secp256k1_ecdsa_sign(myContext, &mySig, digest, secKey, NULL, NULL);
-    printf("Signature created\n\n");
 
     //verify signature
     if (1 == secp256k1_ecdsa_verify(myContext, &mySig, digest, &myPublicKey))
@@ -331,21 +338,90 @@ int VerifyParamsAndSignMessageWithEcdsa(unsigned char* secKey, unsigned char* pu
         printf("DER encoded signature could not be parsed\n\n");
         exit(1);
     }
-
+    
     return 1;
 }
 
-
-int main(int argc, char **argv)
+int main(int argc, char **argv) 
 {
-    //seed random for rng
+    unsigned char* serializedDigest;
+    unsigned char* serializedSecKey;
+    unsigned char* serializedPubKeyCompressed;
+    unsigned char* serializedPubKeyUncompressed;
+    unsigned char* serializedSignatureComp;
+    unsigned char* serializedSignatureDer;
+    serializedDigest = malloc(sizeof(unsigned char)*32);
+    serializedSecKey = malloc(sizeof(unsigned char)*32);
+    serializedPubKeyCompressed = malloc(sizeof(unsigned char)*33);
+    serializedPubKeyUncompressed = malloc(sizeof(unsigned char)*65);
+    serializedSignatureComp = malloc(sizeof(unsigned char)*64);
+    //72 is max length for DER sig, but can be shorters
+    serializedSignatureDer = malloc(sizeof(unsigned char)*72);
+
+    secp256k1_scalar myMessageHash, myPrivateKey;
+
     srand(time(NULL));
 
-    //check args to see which command should be triggered (usage info, test sign, sign)
-    command = ParseArgumentsIntoCommand(argc);
-
-    //execute command (only outputs to console at the moment)
-    ExecuteCommand(argv, command);
+    //if no args passed, display usage info
+    if (argc == 1)
+    {
+        usage();
+        exit(0);
+    }
+    //if only "test" is passed as arg, start test sign
+    else if (argc == 2)
+    {
+        if(strcmp(argv[1],"test") == 0)
+        {
+            printf("\nStarting signing test with test pub/priv keys and test message hash\n\n");
+            //generate random message hash and private key?
+            random_scalar_order_test_new(&myMessageHash);
+            random_scalar_order_test_new(&myPrivateKey);
+            
+            //convert message hash to unsigned char 32 bytes?
+            secp256k1_scalar_get_b32(serializedDigest, &myMessageHash);
+            secp256k1_scalar_get_b32(serializedSecKey, &myPrivateKey);
+            signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
+        }
+        else
+        {
+            printf("\nError: incorrect usage, run program with no args for usage info\n\n");
+            exit(1);
+        }
+    }
+    //if private key and message hash are passed as args, start
+    //production sign
+    else if (argc == 3)
+    {
+        //make sure passed private key and digest are exactly 64 chars long
+        if (strlen(argv[1]) != 64 || strlen(argv[2]) != 64)
+        {
+            printf("\nError: incorrect usage, private key and message hash must be exaclty 64 chars long\n\n");
+            exit(0);
+        }
+      
+        //add space between each hex number in private key and digest 
+        const char* secKey = insertSpaces(argv[1]);
+        const char* digest = insertSpaces(argv[2]);
+        int lengthKey = strlen(secKey);
+        int lengthDigest = strlen(digest);
+        int *keyLengthPtr = &lengthKey;
+        int *digestLengthPtr = &lengthKey;
+        //convert args (string) into array of hex numbers stored
+        //as unsigned chars
+        serializedSecKey = convert(secKey, keyLengthPtr);
+        serializedDigest = convert(digest, digestLengthPtr);
+        signEcdsa(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
+    }
+    //else, too many args passed
+    else
+    {
+        printf("\nError: incorrect usage, run program with no args for usage info\n\n");
+        exit(1);
+    }
+    
+    //print values
+    printValues(serializedSecKey, serializedPubKeyCompressed, serializedPubKeyUncompressed, serializedDigest, serializedSignatureComp, serializedSignatureDer);
     return 0;
 }
 
