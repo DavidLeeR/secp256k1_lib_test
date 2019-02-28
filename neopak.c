@@ -17,7 +17,6 @@
 #include "include/scalar_4x64.h"
 #include "include/testrand_impl.h"
 #include "helper.h"
-#include "sha.h"
 
 <<<<<<< HEAD
 
@@ -29,7 +28,6 @@ void DisplayUsageInfo();
 enum commands ParseArgumentsIntoCommand(int paramArgc);
 void ExecuteCommand(char **paramArgs, enum commands paramCommand);
 char* ReadFileIntoByteArray(char *paramFileName);
-char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileContentsLength);
 void CompleteTestSigProcess();
 void CompleteSigProcess(char *paramSecKey, char *paramFileName);
 int VerifyParamsAndSignMessageWithEcdsa(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char* pubKeyUncomp, unsigned char* digest, unsigned char* signatureComp, unsigned char* signatureDer);
@@ -132,6 +130,8 @@ void CompleteTestSigProcess()
 //DESC: 
 // Sets up all data structures necessary to sign a message digest (sha256; 32 bytes; provided by user)
 // with a key (ECDSA; 32 bytes; provided by user) and signs in ECDSA
+//PARAMS:
+// 1)paramArgv - parameters provided by user at command line
 //OUTPUT:
 // Prints the following to consol:
 //  -serialized private (secret) key
@@ -142,14 +142,7 @@ void CompleteTestSigProcess()
 //  -serialized signature in DER format
 void CompleteSigProcess(char *paramSecKey, char *paramFileName)
 {
-    char* fileDigest;
-    uint8_t fileContents;
-
-    int fileContentsLength = readFileIntoByteArrayAndReturnLength(paramFileName, &fileContents);
-
-    ComputeSha256FromByteArray(&fileContents, fileContentsLength);
-    
-    //old code where the message digest has to be passed to this function, instead of it being calculated from a file
+    readFileIntoByteArray(paramFileName);
     /*
     unsigned char* serializedDigest;
     unsigned char* serializedSecKey;
@@ -192,6 +185,7 @@ void CompleteSigProcess(char *paramSecKey, char *paramFileName)
 }
 
 
+<<<<<<< HEAD
 char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileContentsLength)
 {
     struct SHA256Context digestContext;
@@ -218,6 +212,8 @@ char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileConten
 
 =======
 >>>>>>> parent of 69c036c... code refactor
+=======
+>>>>>>> parent of 02f1a25... all hash functions implemented, but not working properly yet
 //DESC: 
 // Creates an ECDSA signature using a passed in message hash and private key
 //PARAMS:
