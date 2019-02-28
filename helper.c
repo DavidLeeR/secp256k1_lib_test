@@ -37,6 +37,7 @@ size_t strlen(const char *str)
     return(s - str);
 }
 
+
 //helper function to get hex from string char
 static unsigned char gethex(const char *s, char **endptr) {
  assert(s);
@@ -139,20 +140,19 @@ void printValues(unsigned char* secKey, unsigned char* pubKeyComp, unsigned char
 }
 
 
-char* readFileIntoByteArray(char *paramFileName)
+long readFileIntoByteArrayAndReturnLength(char *paramFileName, uint8_t *paramFileContents)
 {
-    FILE *fileptr;
-    char *buffer;
-    long filelen;
+    FILE *filePointer;
+    long fileLength;
 
-    fileptr = fopen(paramFileName, "rb");  // Open the file in binary mode
-    fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-    filelen = ftell(fileptr);             // Get the current byte offset in the file
-    rewind(fileptr);                      // Jump back to the beginning of the file
+    filePointer = fopen(paramFileName, "rb");  // Open the file in binary mode
+    fseek(filePointer, 0, SEEK_END);          // Jump to the end of the file
+    fileLength = ftell(filePointer);             // Get the current byte offset in the file
+    rewind(filePointer);                      // Jump back to the beginning of the file
 
-    buffer = (char *)malloc((filelen+1)*sizeof(char)); // Enough memory for file + \0
-    fread(buffer, filelen, 1, fileptr); // Read in the entire file
-    fclose(fileptr); // Close the file
+    paramFileContents = (uint8_t *)malloc((fileLength+1)*sizeof(uint8_t)); // Enough memory for file + \0
+    fread(paramFileContents, fileLength, 1, filePointer); // Read in the entire file
+    fclose(filePointer); // Close the file
 
-    return buffer;
+    return fileLength;
 }
