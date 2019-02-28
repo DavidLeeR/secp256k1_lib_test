@@ -188,9 +188,9 @@ void CompleteSigProcess(char *paramSecKey, char *paramFileName)
 
 char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileContentsLength)
 {
-    struct SHA256Context digestContext;
-    uint8_t *messageDigest;
-    messageDigest = malloc(32);
+    SHA256Context digestContext;
+    uint8_t messageDigest[32];
+    unsigned char printedMessageDigest[32];
 
     int errorCode;
 
@@ -201,11 +201,12 @@ char* ComputeSha256FromByteArray(uint8_t* paramFileContents, int paramFileConten
     printf("%d", errorCode);
 
     errorCode = SHA256Result(&digestContext, messageDigest);
+    memcpy(printedMessageDigest, messageDigest, 32);
     printf("%d", errorCode);
 
     printf("\n");
     for (int i = 0; i < 32; i++)
-        printf("%02x", messageDigest[i]);
+        printf("%02x", printedMessageDigest[i]);
     printf("\n");
 
 }
